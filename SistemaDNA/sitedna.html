@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DNA Fighter - Gestão</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg-main: #f4f4f5;
+  --sidebar-bg: #0a0a0a;
+  --sidebar-text: #a1a1aa;
+  --sidebar-active: #facc15; 
+  --sidebar-active-text: #000000;
+  --surface: #ffffff;
+  --ink: #18181b;
+  --muted: #71717a;
+  --line: #e4e4e7;
+  --ok: #10b981; 
+  --okbg: #d1fae5;
+  --warn: #f59e0b; 
+  --warnbg: #fef3c7;
+  --font-main: 'Barlow', system-ui, sans-serif;
+  --font-title: 'Barlow Condensed', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-main); color: var(--ink); font: 15px/1.5 var(--font-main); }
+
+/* --- TELA DE LOGIN --- */
+#login-view { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+.login-box { background: var(--surface); padding: 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; border-top: 5px solid var(--sidebar-active); }
+.login-box h1 { font: 700 36px var(--font-title); color: var(--sidebar-bg); margin-bottom: 8px; letter-spacing: 1px; }
+.login-box p.subtitle { color: var(--sidebar-active); font-weight: 700; letter-spacing: 2px; margin-top: -10px; margin-bottom: 30px; }
+.input-group { text-align: left; margin-bottom: 20px; }
+.input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+input, select, textarea { width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; font: 15px var(--font-main); outline: none; transition: 0.2s; background: #fafafa; }
+input:focus, select:focus { border-color: var(--sidebar-active); box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2); background: #fff; }
+.btn-login { width: 100%; padding: 14px; background: var(--sidebar-bg); color: var(--sidebar-active); border: none; border-radius: 8px; font: 700 16px var(--font-main); cursor: pointer; transition: 0.2s; margin-top: 10px; }
+.btn-login:hover { background: #27272a; }
+.login-hint { margin-top: 24px; padding: 16px; background: var(--bg-main); border-radius: 8px; text-align: left; font-size: 13px; color: var(--muted); }
+
+/* --- LAYOUT PRINCIPAL --- */
+#app-view { display: none; min-height: 100vh; flex-direction: row; }
+.sidebar { width: 260px; background: var(--sidebar-bg); display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-logo { padding: 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.sidebar-logo img { height: 40px; width: auto; object-fit: contain; }
+.logo-text { display: flex; flex-direction: column; justify-content: center; }
+.logo-text h1 { font: 700 24px var(--font-title); color: #fff; letter-spacing: 1px; line-height: 1; }
+.logo-text span.cidade { color: var(--sidebar-active); font: 700 13px var(--font-main); letter-spacing: 3px; margin-top: 4px; }
+.sidebar-logo span.fallback { color: var(--sidebar-active); font-size: 28px; }
+.sidebar-menu { padding: 20px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; font-weight: 500; transition: 0.2s; }
+.menu-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.menu-item.active { background: var(--sidebar-active); color: var(--sidebar-active-text); font-weight: 700; }
+.menu-item .icon { font-size: 18px; }
+.sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+.btn-logout { width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font: 600 14px var(--font-main); transition: 0.2s; }
+.btn-logout:hover { background: rgba(255,255,255,0.1); color: var(--sidebar-active); border-color: var(--sidebar-active); }
+
+.main-content { flex: 1; display: flex; flex-direction: column; overflow-x: hidden; }
+.topbar { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; }
+.page-title-top { font: 700 18px var(--font-main); color: var(--ink); }
+.user-info { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.avatar { width: 38px; height: 38px; background: var(--sidebar-active); color: var(--sidebar-active-text); border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 18px; }
+
+.content-area { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+/* --- COMPONENTES UI --- */
+.header-action { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
+.header-action h2 { font: 700 32px var(--font-title); color: var(--ink); }
+.header-action p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.btn-primary { background: var(--sidebar-active); color: var(--sidebar-active-text); border: none; padding: 12px 24px; border-radius: 8px; font: 700 15px var(--font-main); cursor: pointer; transition: 0.2s; }
+.btn-primary:hover { background: #eab308; }
+.btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 10px 20px; border-radius: 8px; font: 600 14px var(--font-main); cursor: pointer; transition: 0.2s; }
+.btn-outline:hover { background: var(--bg-main); border-color: var(--sidebar-active); color: var(--sidebar-bg); }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
+.kpi-card { background: var(--surface); border-radius: 12px; padding: 24px; border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.kpi-title { color: var(--muted); font-size: 13px; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font: 700 36px var(--font-title); color: var(--ink); }
+.kpi-sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+.card { background: var(--surface); border-radius: 12px; border: 1px solid var(--line); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.card-header { padding: 20px 24px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+.card-title { font: 700 20px var(--font-title); color: var(--ink); }
+.card-body { padding: 24px; }
+
+/* Listas */
+.list-item { display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--line); transition: 0.1s; }
+.list-item:last-child { border-bottom: none; }
+.list-item:hover { background: var(--bg-main); }
+.time-box { background: var(--sidebar-bg); color: var(--sidebar-active); padding: 8px 12px; border-radius: 6px; font-weight: 700; text-align: center; margin-right: 16px; min-width: 70px; }
+.item-info { flex: 1; }
+.item-name { font-weight: 700; font-size: 16px; display:flex; align-items:center; gap:8px}
+.item-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* Alunos e Graduação */
+.student-row { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--line); transition: 0.1s; }
+.student-row:hover { background: var(--bg-main); }
+.student-row.present { background: var(--okbg); border-left: 4px solid var(--ok); }
+.student-row.pending { background: var(--warnbg); border-left: 4px solid var(--warn); }
+.student-name { flex: 1; font-weight: 600; font-size: 16px; }
+.chk { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: transparent; font-weight: bold; background: #fff; cursor: pointer; }
+.student-row.present .chk { background: var(--ok); border-color: var(--ok); color: #fff; }
+
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge.ok { background: var(--okbg); color: var(--ok); }
+.badge.warn { background: var(--warnbg); color: var(--warn); }
+.badge.info { background: #e0f2fe; color: #0284c7; }
+.badge.gi { background: #e0e7ff; color: #4338ca; }
+.badge.nogi { background: #fce7f3; color: #be185d; }
+.badge.livre { background: #f3e8ff; color: #7e22ce; }
+
+/* --- DESIGN DAS FAIXAS (A PROVA DE FALHAS) --- */
+.belt { 
+  width: 76px; 
+  height: 18px; 
+  position: relative; 
+  border: 1px solid rgba(0,0,0,0.4); 
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.belt-tarja { 
+  position: absolute;
+  right: 10px; /* O pedacinho da faixa que sobra na direita */
+  top: 0;
+  bottom: 0;
+  width: 38px; /* Largura da tarja */
+  display: flex;
+  justify-content: flex-end; /* Empurra os graus para a direita da tarja */
+  align-items: center;
+  padding-right: 4px;
+  gap: 3px;
+}
+.belt-grau { 
+  width: 4px; 
+  height: 100%; 
+  background-color: #ffffff; 
+  flex-shrink: 0;
+}
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* Banner de Celebração */
+.celebration-banner { background: linear-gradient(135deg, var(--ok) 0%, #047857 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); animation: slideDown 0.5s ease; border-left: 6px solid #fff; }
+.celebration-banner h3 { font: 700 24px var(--font-title); margin-bottom: 6px; color: #fff; }
+.celebration-banner p { font-size: 15px; line-height: 1.4; opacity: 0.95; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Mobile */
+@media (max-width: 768px) {
+  #app-view { flex-direction: column; }
+  .sidebar { width: 100%; flex-direction: row; overflow-x: auto; align-items: center; padding: 0; }
+  .sidebar-logo { padding: 15px; border: none; }
+  .sidebar-menu { flex-direction: row; padding: 0; overflow-x: auto; }
+  .menu-item { padding: 15px; white-space: nowrap; }
+  .sidebar-footer { display: none; }
+  .topbar { padding: 0 15px; }
+  .content-area { padding: 15px; }
+  .header-action { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .celebration-banner { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="login-view" style="display: none;">
+  <div class="login-box">
+    <h1>DNA FIGHTER</h1>
+    <p class="subtitle">CODÓ</p>
+    
+    <div class="input-group">
+      <label>Nome de Acesso</label>
+      <input type="text" id="login-nome" placeholder="Ex: Professor">
+    </div>
+    <div class="input-group">
+      <label>PIN (4 dígitos)</label>
+      <input type="password" id="login-pin" maxlength="4" placeholder="****">
+    </div>
+    
+    <button class="btn-login" onclick="fazerLogin()">Acessar Painel</button>
+    
+    <div class="login-hint">
+      <b>Contas para Teste:</b><br>
+      👨‍🏫 Professor: <b>Professor</b> | <b>0000</b><br>
+      🥋 Aluno: <b>Carlos Silva</b> | <b>1234</b>
+    </div>
+  </div>
+</div>
+
+<!-- PAINEL PRINCIPAL -->
+<div id="app-view">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="Logo" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+      <span id="logo-fallback" class="fallback" style="display:none;">🥋</span>
+      <div class="logo-text">
+        <h1>DNA FIGHTER</h1>
+        <span class="cidade">CODÓ</span>
+      </div>
+    </div>
+    <div class="sidebar-menu" id="sidebar-menu">
+      <!-- Injetado via JS -->
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="fazerLogout()">Sair do Sistema</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="page-title-top" id="topbar-title">Visão Geral</div>
+      <div class="user-info">
+        <div class="avatar" id="user-avatar">P</div>
+        <span id="user-name">Professor</span>
+      </div>
+    </header>
+
+    <div class="content-area" id="view-container">
+      <!-- Conteúdo dinâmico -->
+    </div>
+  </main>
+</div>
+
+<script>
+// ==========================================
+// 1. UTILITÁRIOS E VARIÁVEIS GLOBAIS
+// ==========================================
+const KEY='dnafighter-v19'; 
+const USER_KEY='dnafighter_user'; 
+
+const today=()=>new Date().toLocaleDateString('sv-SE');
+const mesAtual=()=>today().slice(0,7);
+
+const COR={
+  Branca:'#ffffff', Cinza:'#8d9499', Amarela:'#f2c200', Laranja:'#ef7d1a', Verde:'#2e9b4f',
+  Azul:'#1f5fbf', Roxa:'#6b3fa0', Marrom:'#6b4423', Preta:'#16191c', Vermelha:'#c1121f'
+};
+
+const FAIXAS_ADULTAS = ['Branca', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+const FAIXAS_INFANTIS = ['Branca', 'Cinza', 'Amarela', 'Laranja', 'Verde'];
+
+let currentUser = null;
+let view = 'dashboard';
+let currentDate = today();
+let tid = 't1';
+
+const $ = s => document.querySelector(s);
+
+// Design perfeito da faixa (Padrão IBJJF à prova de bugs)
+const belt = a => {
+  const isBlack = a.faixa === 'Preta';
+  const barColor = isBlack ? '#c1121f' : '#111'; 
+  const bgColor = COR[a.faixa] || '#000';
+  
+  const graus = Array(a.graus).fill('<div class="belt-grau"></div>').join('');
+  
+  return `<div class="belt" style="background-color: ${bgColor}">
+    <div class="belt-tarja" style="background-color: ${barColor}">
+      ${graus}
+    </div>
+  </div>`;
+};
+
+const isPago = id => (S.pag[mesAtual()] || []).includes(id);
+
+const getIdade = (dataNasc) => {
+  if(!dataNasc) return 0;
+  const hoje = new Date(today());
+  const nasc = new Date(dataNasc);
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  const m = hoje.getMonth() - nasc.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+  return idade;
+};
+
+const calcTempoFaixa = (dataStr) => {
+  if(!dataStr) return 'Não informado';
+  const d1 = new Date(dataStr);
+  const d2 = new Date(today());
+  let meses = (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
+  if(meses < 0) meses = 0;
+  if(meses >= 12) return `${Math.floor(meses/12)} ano(s) e ${meses%12} mês(es)`;
+  return `${meses} mês(es)`;
+}
+
+function getTipoTreino(dataStr, turmaId) {
+  const date = new Date(dataStr + 'T12:00:00');
+  const day = date.getDay(); 
+  const isTreino2 = turmaId === 't2';
+
+  if (day === 1) return { tipo: 'Quimono', badge: 'gi' };
+  if (day === 2) return isTreino2 ? { tipo: 'No-Gi', badge: 'nogi' } : { tipo: 'Quimono', badge: 'gi' };
+  if (day === 3) return { tipo: 'Quimono', badge: 'gi' };
+  if (day === 4) return { tipo: 'No-Gi', badge: 'nogi' };
+  if (day === 5) return { tipo: 'Livre', badge: 'livre' };
+  
+  return { tipo: 'Especial', badge: 'info' }; 
+}
+
+// ==========================================
+// 2. ESTADO E INICIALIZAÇÃO
+// ==========================================
+let S={
+  alunos:[
+    {id:'a1', nome:'Carlos Silva', faixa:'Azul', graus:2, pin:'1234', mensalidade: 150, dataFaixa: '2024-05-10', nasc: '1995-11-04', tel: '(99) 99999-1111', end: 'Rua das Flores, 123', dataEntrada: '2023-11-04'},
+    {id:'a2', nome:'Maran', faixa:'Roxa', graus:4, pin:'4321', mensalidade: 150, dataFaixa: '2022-01-15', nasc: '1990-05-20', tel: '(99) 99999-2222', end: 'Av. Central, 456', dataEntrada: '2020-02-10'},
+    {id:'a3', nome:'Nandinho', faixa:'Marrom', graus:1, pin:'1111', mensalidade: 120, dataFaixa: '2023-11-20', nasc: '1988-08-12', tel: '(99) 99999-3333', end: 'Rua do Tatame, 789', dataEntrada: '2021-01-10'},
+    {id:'a4', nome:'Joãozinho (Kids)', faixa:'Verde', graus:3, pin:'5555', mensalidade: 100, dataFaixa: '2024-02-10', nasc: '2015-05-10', tel: '(99) 99999-4444', end: 'Rua do Tatame, 789', dataEntrada: '2022-02-10'}
+  ],
+  pres:{}, 
+  pag:{},  
+  turmas:[
+    {id:'t1', nome:'Treino 1', hora:'17:30', prof:'Mestre Silva'},
+    {id:'t2', nome:'Treino 2', hora:'19:30', prof:'Mestre Silva'}
+  ],
+  eventos: [
+    {id:'ev1', nome:'Treino da Manhã', data: today(), hora:'06:00', tipo:'Quimono', prof:'Mestre Silva'},
+    {id:'ev2', nome:'Treino de Sábado', data: today(), hora:'16:00', tipo:'Quimono', prof:'Prof. François'}
+  ]
+};
+
+try{const r=localStorage.getItem(KEY);if(r)Object.assign(S,JSON.parse(r))}catch(e){}
+
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+// ==========================================
+// 3. AUTENTICAÇÃO E PERSISTÊNCIA DE SESSÃO
+// ==========================================
+function fazerLogin(){
+  const nome = $('#login-nome').value.trim();
+  const pin = $('#login-pin').value.trim();
+  
+  if(nome.toLowerCase() === 'professor' && pin === '0000'){
+    currentUser = {tipo:'professor', nome: 'Administrador'};
+    localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+    view = 'dashboard';
+    mostrarApp();
+  } else {
+    const aluno = S.alunos.find(a => a.nome.toLowerCase() === nome.toLowerCase() && a.pin === pin);
+    if(aluno){ 
+      currentUser = {tipo:'aluno', id:aluno.id, nome: aluno.nome.split(' ')[0]}; 
+      localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+      mostrarApp(); 
+    } else { 
+      alert('Nome ou PIN incorretos.'); 
+    }
+  }
+}
+
+function fazerLogout(){
+  currentUser = null;
+  localStorage.removeItem(USER_KEY);
+  $('#login-view').style.display = 'flex';
+  $('#app-view').style.display = 'none';
+  $('#login-nome').value = '';
+  $('#login-pin').value = '';
+}
+
+function mostrarApp(){
+  $('#login-view').style.display = 'none';
+  $('#app-view').style.display = 'flex';
+  render();
+}
+
+// ==========================================
+// 4. RENDERIZAÇÃO
+// ==========================================
+function render(){
+  if(!currentUser) return;
+  $('#user-avatar').textContent = currentUser.nome[0];
+  $('#user-name').textContent = currentUser.nome;
+
+  if(currentUser.tipo === 'aluno') {
+    $('#sidebar-menu').innerHTML = `<div class="menu-item active"><span class="icon">👤</span> Minha Área</div>`;
+    $('#topbar-title').textContent = 'Área do Aluno';
+    renderAlunoView();
+    return;
+  }
+
+  const menu = [
+    {id:'dashboard', icon:'📊', label:'Visão geral'},
+    {id:'alunos', icon:'👥', label:'Alunos'},
+    {id:'frequencia', icon:'📋', label:'Frequência'},
+    {id:'eventos', icon:'🤼', label:'Eventos Extras'},
+    {id:'graduacao', icon:'🥋', label:'Graduação'},
+    {id:'mensalidades', icon:'💳', label:'Financeiro'}
+  ];
+
+  $('#sidebar-menu').innerHTML = menu.map(m => `
+    <div class="menu-item ${view===m.id?'active':''}" onclick="mudarView('${m.id}')">
+      <span class="icon">${m.icon}</span> ${m.label}
+    </div>
+  `).join('');
+
+  $('#topbar-title').textContent = menu.find(m=>m.id===view).label;
+
+  const container = $('#view-container');
+  
+  if(view === 'dashboard') container.innerHTML = viewDashboard();
+  if(view === 'alunos') container.innerHTML = viewAlunos();
+  if(view === 'frequencia') container.innerHTML = viewFrequencia();
+  if(view === 'eventos') container.innerHTML = viewEventos();
+  if(view === 'graduacao') container.innerHTML = viewGraduacao();
+  if(view === 'mensalidades') container.innerHTML = viewMensalidades();
+}
+
+function mudarView(v) { view = v; render(); }
+
+// ==========================================
+// 5. TELAS DO PROFESSOR
+// ==========================================
+function viewDashboard(){
+  const alunosAtivos = S.alunos.length;
+  const presencasHoje = Object.keys(S.pres).filter(k => k.startsWith(today())).reduce((acc, k) => acc + S.pres[k].length, 0);
+
+  return `
+    <div class="header-action">
+      <div>
+        <h2>Visão Geral</h2>
+        <p>Acompanhe a rotina da sua academia.</p>
+      </div>
+      <button class="btn-primary" onclick="mudarView('alunos')">+ Novo Aluno</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Alunos Ativos</div>
+        <div class="kpi-value">${alunosAtivos}</div>
+        <div class="kpi-sub">Matriculados na unidade</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Presenças Hoje</div>
+        <div class="kpi-value">${presencasHoje}</div>
+        <div class="kpi-sub">Check-ins registrados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Turmas Hoje</div>
+        <div class="kpi-value">${S.turmas.length}</div>
+        <div class="kpi-sub">Aulas regulares</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Eventos Extras</div>
+        <div class="kpi-value">${S.eventos.length}</div>
+        <div class="kpi-sub">Cadastrados no mês</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Aulas de Hoje</div>
+        <span style="font-size:14px; color:var(--muted); font-weight:600">${new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: 'numeric', month: 'short'})}</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        ${S.turmas.map(t => {
+          const info = getTipoTreino(today(), t.id);
+          return `
+          <div class="list-item">
+            <div class="time-box">${t.hora}</div>
+            <div class="item-info">
+              <div class="item-name">${t.nome} <span class="badge ${info.badge}">${info.tipo}</span></div>
+              <div class="item-meta">Prof. ${t.prof.split(' ')[1]}</div>
+            </div>
+            <button class="btn-outline" onclick="fazerChamada('${t.id}')">Chamada</button>
+          </div>
+        `}).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function viewAlunos(){
+  return `
+    <div class="header-action">
+      <div><h2>Gestão de Alunos</h2><p>Cadastre e gerencie os atletas da academia.</p></div>
+    </div>
+    
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><div class="card-title">Novo Cadastro Rápido</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <input type="text" id="nm" placeholder="Nome completo">
+          <input type="text" id="pin" placeholder="PIN (4 dígitos - opcional)" maxlength="4">
+          <input type="number" id="valor" placeholder="Valor da Mensalidade" value="120">
+          <button class="btn-primary" onclick="addAluno()">Cadastrar Aluno</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      ${S.alunos.map(a => `
+        <div class="student-row" style="cursor:default">
+          ${belt(a)}
+          <div class="student-name">${a.nome}<div class="kpi-sub">PIN: ${a.pin} | R$ ${a.mensalidade||120},00</div></div>
+          <button class="btn-outline" onclick="editAluno('${a.id}')" style="padding:6px 12px; font-size:13px; font-weight:600;">Editar</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function editAluno(id){
+  const a = S.alunos.find(x=>x.id===id);
+  $('#view-container').innerHTML = `
+    <div class="header-action">
+      <div><h2>Editar Ficha</h2><p>Atualize os dados de ${a.nome}.</p></div>
+      <button class="btn-outline" onclick="mudarView('alunos')">Voltar</button>
+    </div>
+    <div class="card"><div class="card-body">
+      <div class="form-grid">
+        <label>Nome<input type="text" id="ed-nome" value="${a.nome}"></label>
+        <label>PIN de Acesso<input type="text" id="ed-pin" value="${a.pin}" maxlength="4"></label>
+        <label>Data de Nascimento<input type="date" id="ed-nasc" value="${a.nasc||''}"></label>
+        <label>Data de Entrada<input type="date" id="ed-entrada" value="${a.dataEntrada||today()}"></label>
+        <label>Telefone<input type="text" id="ed-tel" value="${a.tel||''}"></label>
+        <label>Endereço<input type="text" id="ed-end" value="${a.end||''}"></label>
+        <label>Mensalidade (R$)<input type="number" id="ed-valor" value="${a.mensalidade||120}"></label>
+      </div>
+      <button class="btn-primary" onclick="salvarEdicao('${a.id}')">Salvar Alterações</button>
+    </div></div>
+  `;
+}
+
+function salvarEdicao(id){
+  const a = S.alunos.find(x=>x.id===id);
+  a.nome = $('#ed-nome').value;
+  a.pin = $('#ed-pin').value;
+  a.nasc = $('#ed-nasc').value;
+  a.dataEntrada = $('#ed-entrada').value;
+  a.tel = $('#ed-tel').value;
+  a.end = $('#ed-end').value;
+  a.mensalidade = parseFloat($('#ed-valor').value);
+  save();
+  alert("Ficha atualizada com sucesso!");
+  mudarView('alunos');
+}
+
+function viewFrequencia(){
+  const ids = S.pres[currentDate+'|'+tid] || [];
+  const isEvent = tid.startsWith('ev');
+  
+  let nomeTurma, tipoLabel, badgeClass, prof, hora;
+  if(isEvent) {
+    const ev = S.eventos.find(e=>e.id===tid);
+    if(ev) { nomeTurma = ev.nome; tipoLabel = ev.tipo; badgeClass = ev.tipo==='No-Gi'?'nogi':'gi'; prof = ev.prof; hora = ev.hora; }
+  } else {
+    const t = S.turmas.find(x=>x.id===tid);
+    const info = getTipoTreino(currentDate, tid);
+    if(t) { nomeTurma = t.nome; tipoLabel = info.tipo; badgeClass = info.badge; prof = t.prof; hora = t.hora; }
+  }
+
+  return `
+    <div class="header-action">
+      <div><h2>${isEvent ? 'Chamada do Evento' : 'Fazer Chamada'}</h2><p>Selecione e marque os presentes.</p></div>
+    </div>
+    
+    <div style="display:flex; gap:16px; margin-bottom:24px; max-width:500px; ${isEvent ? 'display:none' : ''}">
+      <input type="date" value="${currentDate}" onchange="currentDate=this.value; render()">
+      <select onchange="tid=this.value; render()">
+        <optgroup label="Aulas Regulares">
+          ${S.turmas.map(t=>`<option value="${t.id}" ${t.id===tid?'selected':''}>${t.nome} (${t.hora})</option>`).join('')}
+        </optgroup>
+        <optgroup label="Eventos Extras">
+          ${S.eventos.map(e=>`<option value="${e.id}" ${e.id===tid?'selected':''}>${e.nome} (${e.data.split('-').reverse().slice(0,2).join('/')})</option>`).join('')}
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:var(--bg-main)">
+        <div class="card-title">${ids.length} Presentes</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="badge ${badgeClass}">${tipoLabel}</span>
+          <span class="badge" style="background:var(--surface); border:1px solid var(--line)">Total: ${S.alunos.length}</span>
+        </div>
+      </div>
+      ${S.alunos.map(a => {
+        const isPresent = ids.includes(a.id);
+        return `
+          <div class="student-row ${isPresent?'present':''}" onclick="togglePres('${a.id}')">
+            ${belt(a)}
+            <div class="student-name">${a.nome}</div>
+            <div class="chk">✓</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function viewEventos(){
+  return `
+    <div class="header-action">
+      <div><h2>Eventos Extras</h2><p>Treinos da manhã, sábados, seminários e No-Gi.</p></div>
+      <button class="btn-outline" onclick="addTreinoManha()" style="border-color:var(--sidebar-active); color:var(--sidebar-bg); font-weight:700">+ Treino 06:00 Manhã</button>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><div class="card-title">Novo Evento</div></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <input type="text" id="ev-nome" placeholder="Nome do Evento (Ex: Treino de Sábado)">
+          <input type="date" id="ev-data" value="${today()}">
+          <input type="time" id="ev-hora" value="16:00">
+          <select id="ev-tipo">
+            <option value="Quimono">Quimono (Gi)</option>
+            <option value="No-Gi">Sem Quimono (No-Gi)</option>
+            <option value="Seminário">Seminário</option>
+          </select>
+          <input type="text" id="ev-prof" placeholder="Professor responsável" value="Prof. François">
+          <button class="btn-primary" onclick="addEvento()">Criar Evento</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Eventos Cadastrados</div></div>
+      ${S.eventos.length ? S.eventos.map(e => `
+        <div class="list-item">
+          <div class="time-box">${e.hora}</div>
+          <div class="item-info">
+            <div class="item-name">${e.nome} <span class="badge ${e.tipo==='No-Gi'?'nogi':'gi'}">${e.tipo}</span></div>
+            <div class="item-meta">${e.data.split('-').reverse().join('/')} · ${e.prof}</div>
+          </div>
+          <button class="btn-outline" onclick="fazerChamada('${e.id}')">Chamada</button>
+        </div>
+      `).join('') : '<div style="padding:40px; text-align:center; color:var(--muted)">Nenhum evento extra agendado.</div>'}
+    </div>
+  `;
+}
+
+function viewGraduacao(){
+  return `
+    <div class="header-action">
+      <div><h2>Gestão de Graduação</h2><p>Controle a evolução das faixas e graus dos alunos.</p></div>
+    </div>
+
+    <div class="card">
+      ${S.alunos.map(a => {
+        const podeDarGrau = a.graus < 4 && a.faixa !== 'Preta';
+        return `
+          <div class="student-row" style="align-items:flex-start; flex-wrap:wrap">
+            <div style="display:flex; align-items:center; gap:16px; flex:1; min-width:200px">
+              ${belt(a)}
+              <div class="student-name">${a.nome}
+                <div class="kpi-sub">Na faixa há: <b>${calcTempoFaixa(a.dataFaixa)}</b></div>
+              </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+              <span class="badge info">${a.faixa} - ${a.graus}º Grau</span>
+              
+              ${podeDarGrau ? `
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px; border-color:var(--ok); color:var(--ok)" onclick="darGrau('${a.id}')">+ 1 Grau</button>
+              ` : `
+                <button class="btn-outline" style="padding:6px 12px; font-size:12px; border-color:var(--sidebar-active); background:var(--sidebar-active); color:#000; font-weight:700" onclick="mudarFaixa('${a.id}')">Promover Faixa</button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function viewMensalidades(){
+  const pagos = S.pag[mesAtual()] || [];
+  let totalRecebido = 0, totalPrevisto = 0;
+  
+  S.alunos.forEach(a => {
+    const val = a.mensalidade || 120;
+    totalPrevisto += val;
+    if(pagos.includes(a.id)) totalRecebido += val;
+  });
+  
+  const porcentagem = totalPrevisto ? (totalRecebido/totalPrevisto*100).toFixed(0) : 0;
+
+  return `
+    <div class="header-action">
+      <div><h2>Controle Financeiro</h2><p>Gerencie as mensalidades de ${new Date().toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'})}.</p></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Recebido no Mês</div>
+        <div class="kpi-value" style="color:var(--ok)">R$ ${totalRecebido.toFixed(2).replace('.', ',')}</div>
+        <div class="kpi-sub">${pagos.length} pagamentos confirmados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">A Receber</div>
+        <div class="kpi-value" style="color:var(--warn)">R$ ${(totalPrevisto-totalRecebido).toFixed(2).replace('.', ',')}</div>
+        <div class="kpi-sub">Mensalidades pendentes</div>
+      </div>
+      <div class="kpi-card" style="display:flex; align-items:center; justify-content:center; gap:20px">
+        <div style="position:relative; width:80px; height:80px; display:flex; justify-content:center; align-items:center">
+            <svg width="80" height="80" style="position:absolute; top:0; left:0; transform: rotate(-90deg);">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--line)" stroke-width="8" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--sidebar-active)" stroke-width="8" stroke-dasharray="201" stroke-dashoffset="${201 - (201 * (porcentagem/100))}" stroke-linecap="round"/>
+            </svg>
+            <div style="text-align:center; z-index:1">
+              <span style="font:700 20px var(--font-title); display:block; line-height:1">${porcentagem}%</span>
+            </div>
+          </div>
+        <div>
+          <div class="kpi-title" style="margin-bottom:4px">Arrecadação</div>
+          <div class="kpi-sub">Previsão: R$ ${totalPrevisto.toFixed(2).replace('.', ',')}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      ${S.alunos.map(a => {
+        const pago = pagos.includes(a.id);
+        return `
+          <div class="student-row ${pago?'present':'pending'}" onclick="togglePag('${a.id}')">
+            ${belt(a)}
+            <div class="student-name">${a.nome}<div class="kpi-sub">R$ ${a.mensalidade||120},00</div></div>
+            <span class="badge ${pago?'ok':'warn'}">${pago?'Pago':'Pendente'}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+// ==========================================
+// 6. TELA DO ALUNO E NOTIFICAÇÕES
+// ==========================================
+function renderAlunoView(){
+  const a = S.alunos.find(x=>x.id===currentUser.id);
+  const pago = isPago(a.id);
+  
+  let celebrationHtml = '';
+  const hojeStr = today();
+  const mesDiaHoje = hojeStr.slice(5); 
+  
+  let msgs = [];
+  
+  if(a.nasc && a.nasc.slice(5) === mesDiaHoje) {
+    msgs.push(`🎂 <b>Feliz Aniversário, ${a.nome.split(' ')[0]}!</b> Que este novo ano de vida seja repleto de vitórias, saúde e muito jiu-jitsu. O tatame te espera para comemorar! Oss!`);
+  }
+  
+  if(a.dataEntrada) {
+    const anoEntrada = new Date(a.dataEntrada).getFullYear();
+    const anoHoje = new Date(hojeStr).getFullYear();
+    const diffAnos = anoHoje - anoEntrada;
+    
+    if(diffAnos > 0 && a.dataEntrada.slice(5) === mesDiaHoje) {
+      msgs.push(`🏆 <b>Parabéns!</b> Hoje completamos <b>${diffAnos} ano(s)</b> de uma jornada de suor, dedicação e evolução juntos. É uma honra ter você na família DNA Fighter!`);
+    }
+  }
+
+  if(msgs.length > 0) {
+    celebrationHtml = `
+      <div class="celebration-banner">
+        <div style="font-size:48px;">🎉</div>
+        <div>
+          <h3 style="margin-bottom:8px">Uma data especial!</h3>
+          ${msgs.map(m => `<p style="margin-bottom:8px;">${m}</p>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  let totalAulas = 0;
+  const treinosDias = new Set(); 
+  const historico = [];
+  const mesAtualStr = mesAtual();
+
+  Object.keys(S.pres).forEach(k => {
+    if(S.pres[k].includes(a.id)){
+      totalAulas++;
+      const [d, t] = k.split('|');
+      
+      if(d.startsWith(mesAtualStr)) {
+        treinosDias.add(d);
+      }
+
+      let nomeAtividade = '';
+      if(t.startsWith('ev')) {
+        const ev = S.eventos.find(e=>e.id===t);
+        nomeAtividade = ev ? ev.nome : 'Evento Extra';
+      } else {
+        const turma = S.turmas.find(x=>x.id===t);
+        nomeAtividade = turma ? turma.nome : 'Aula';
+      }
+      
+      historico.push({data: d, turma: nomeAtividade});
+    }
+  });
+  historico.sort((x,y)=>y.data.localeCompare(x.data));
+
+  const treinosMes = treinosDias.size; 
+  const metaTreinos = 22; 
+  
+  let porcentagem = (treinosMes / metaTreinos) * 100;
+  let corProgresso = 'var(--sidebar-active)'; 
+  let msgProgresso = 'Continue focado nos treinos!';
+  
+  if(porcentagem >= 100) {
+    porcentagem = 100;
+    corProgresso = 'var(--ok)'; 
+    msgProgresso = '🔥 Meta batida! Você é fera!';
+  } else if (porcentagem >= 50) {
+    msgProgresso = '💪 Bom ritmo, não pare agora!';
+  }
+
+  $('#view-container').innerHTML = `
+    ${celebrationHtml}
+    
+    <div class="header-action">
+      <div><h2>Olá, ${a.nome.split(' ')[0]}</h2><p>Bem-vindo à sua área exclusiva.</p></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" style="text-align:center">
+        <div class="kpi-title" style="justify-content:center">Sua Graduação</div>
+        <div style="margin:16px 0">${belt(a)}</div>
+        <div style="font:700 24px var(--font-title)">${a.faixa} ${a.graus}º Grau</div>
+        <div class="kpi-sub" style="margin-top:8px">Há ${calcTempoFaixa(a.dataFaixa)}</div>
+      </div>
+      
+      <div class="kpi-card" style="text-align:center; display:flex; flex-direction:column; justify-content:center">
+        <div class="kpi-title" style="justify-content:center">Aulas Assistidas</div>
+        <div class="kpi-value" style="margin:0; font-size:44px">${totalAulas}</div>
+        <div class="kpi-sub">Desde o início</div>
+      </div>
+
+      <div class="kpi-card" style="text-align:center; display:flex; flex-direction:column; justify-content:center">
+        <div class="kpi-title" style="justify-content:center">Financeiro</div>
+        <div style="margin:16px 0"><span class="badge ${pago?'ok':'warn'}" style="font-size:16px; padding:10px 20px">${pago?'Em dia':'Pendente'}</span></div>
+        <div class="kpi-sub">Mensalidade atual</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-body" style="display:flex; align-items:center; gap:30px; flex-wrap:wrap; justify-content:center">
+        
+        <div style="position:relative; width:140px; height:140px; display:flex; justify-content:center; align-items:center; flex-shrink:0">
+          <svg width="140" height="140" style="position:absolute; top:0; left:0; transform: rotate(-90deg);">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--line)" stroke-width="12" />
+            <circle cx="70" cy="70" r="60" fill="none" stroke="${corProgresso}" stroke-width="12" stroke-dasharray="377" stroke-dashoffset="${377 - (377 * porcentagem / 100)}" stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;"/>
+          </svg>
+          <div style="text-align:center; z-index:1">
+            <span style="font:700 32px var(--font-title); color:var(--ink); display:block; line-height:1">${porcentagem.toFixed(0)}%</span>
+            <span style="font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:600">Concluído</span>
+          </div>
+        </div>
+
+        <div style="flex:1; min-width:200px">
+          <h3 style="font:700 24px var(--font-title); margin-bottom:8px">Progresso do Mês</h3>
+          <p style="color:var(--muted); margin-bottom:16px">${msgProgresso}</p>
+          
+          <div style="background:var(--bg-main); padding:16px; border-radius:8px; display:inline-block; width:100%; max-width:300px">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+              <span style="font-weight:600">Dias de treino</span>
+              <span style="font-weight:700; color:${corProgresso}">${treinosMes} dias</span>
+            </div>
+            <div style="width:100%; height:8px; background:var(--line); border-radius:4px; overflow:hidden">
+              <div style="height:100%; width:${porcentagem}%; background:${corProgresso}; border-radius:4px"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-header"><div class="card-title">Meu Perfil</div></div>
+      <div class="card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div>
+          <div class="kpi-sub">Data de Nascimento</div>
+          <div style="font-weight:600; font-size:16px">${a.nasc ? a.nasc.split('-').reverse().join('/') : 'Não informada'}</div>
+        </div>
+        <div>
+          <div class="kpi-sub">Membro desde</div>
+          <div style="font-weight:600; font-size:16px">${a.dataEntrada ? a.dataEntrada.split('-').reverse().join('/') : 'Não informada'}</div>
+        </div>
+        <div>
+          <div class="kpi-sub">Telefone</div>
+          <div style="font-weight:600; font-size:16px">${a.tel || 'Não informado'}</div>
+        </div>
+        <div>
+          <div class="kpi-sub">Endereço</div>
+          <div style="font-weight:600; font-size:16px">${a.end || 'Não informado'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Histórico de Presença</div></div>
+      ${historico.length ? historico.map(h => `
+        <div style="padding:16px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between;">
+          <span style="font-weight:600">${h.data.split('-').reverse().join('/')}</span>
+          <span style="color:var(--muted)">${h.turma}</span>
+        </div>
+      `).join('') : '<div style="padding:40px; text-align:center; color:var(--muted)">Nenhum treino registrado ainda.</div>'}
+    </div>
+  `;
+}
+
+// ==========================================
+// 7. AÇÕES
+// ==========================================
+function addAluno(){
+  const nm = $('#nm').value.trim();
+  let pin = $('#pin').value.trim();
+  const val = parseFloat($('#valor').value) || 120;
+  
+  if(!nm) return alert("Preencha o nome");
+  if(!pin) pin = Math.floor(1000 + Math.random() * 9000).toString();
+  
+  if(S.alunos.some(a=>a.nome.toLowerCase() === nm.toLowerCase())) return alert("Aluno já existe.");
+  
+  S.alunos.push({
+    id:'a'+Date.now().toString(36), 
+    nome:nm, 
+    pin:pin, 
+    mensalidade:val, 
+    faixa:'Branca', 
+    graus:0, 
+    dataFaixa: today(),
+    nasc: '',
+    dataEntrada: today(),
+    tel: '',
+    end: ''
+  });
+  save();
+  alert(`Aluno ${nm} cadastrado!\nPIN: ${pin}`);
+  render();
+}
+
+function togglePres(id){
+  const k = currentDate+'|'+tid;
+  const s = new Set(S.pres[k] || []);
+  s.has(id) ? s.delete(id) : s.add(id);
+  S.pres[k] = [...s];
+  save();
+  render();
+}
+
+function togglePag(id){
+  const s = new Set(S.pag[mesAtual()] || []);
+  s.has(id) ? s.delete(id) : s.add(id);
+  S.pag[mesAtual()] = [...s];
+  save();
+  render();
+}
+
+function fazerChamada(idTurma){
+  tid = idTurma;
+  const isEvent = tid.startsWith('ev');
+  if(isEvent){
+    const ev = S.eventos.find(e=>e.id===tid);
+    if(ev) currentDate = ev.data;
+  }
+  view = 'frequencia';
+  render();
+}
+
+function addEvento(){
+  const nome = $('#ev-nome').value.trim();
+  const data = $('#ev-data').value;
+  const hora = $('#ev-hora').value;
+  const tipo = $('#ev-tipo').value;
+  const prof = $('#ev-prof').value.trim();
+
+  if(!nome || !data || !hora) return alert("Preencha os dados do evento.");
+
+  S.eventos.push({id:'ev'+Date.now().toString(36), nome, data, hora, tipo, prof});
+  save();
+  render();
+}
+
+function addTreinoManha(){
+  const data = prompt("Para qual data é o treino da manhã? (AAAA-MM-DD)", today());
+  if(!data) return;
+  S.eventos.push({id:'ev'+Date.now().toString(36), nome:'Treino da Manhã (06:00)', data: data, hora:'06:00', tipo:'Quimono', prof:'Mestre Silva'});
+  save();
+  render();
+  alert("Treino da manhã adicionado!");
+}
+
+function darGrau(id){
+  const a = S.alunos.find(x => x.id === id);
+  if(a.graus < 4) {
+    a.graus++;
+    save();
+    render();
+  }
+}
+
+function mudarFaixa(id){
+  const a = S.alunos.find(x => x.id === id);
+  const idade = getIdade(a.nasc);
+  
+  const lista = idade < 16 ? FAIXAS_INFANTIS : FAIXAS_ADULTAS;
+  const idxAtual = lista.indexOf(a.faixa);
+  
+  if(idxAtual === -1) {
+    if(confirm(`A faixa atual (${a.faixa}) não faz parte da categoria de ${idade} anos. Deseja reiniciar na faixa Branca?`)){
+      a.faixa = 'Branca';
+      a.graus = 0;
+      a.dataFaixa = today();
+      save();
+      render();
+    }
+    return;
+  }
+
+  if(idxAtual < lista.length - 1) {
+    if(confirm(`Promover ${a.nome} de ${a.faixa} para ${lista[idxAtual+1]}?`)){
+      a.faixa = lista[idxAtual+1];
+      a.graus = 0;
+      a.dataFaixa = today();
+      save();
+      render();
+    }
+  } else {
+    alert("O aluno já está na última faixa da sua categoria!");
+  }
+}
+
+// ==========================================
+// 8. INICIALIZAÇÃO COM VERIFICAÇÃO DE LOGIN
+// ==========================================
+function init(){
+  const saved = localStorage.getItem(USER_KEY);
+  if(saved){
+    try {
+      const user = JSON.parse(saved);
+      if(user.tipo === 'aluno' && !S.alunos.find(a => a.id === user.id)) {
+        fazerLogout();
+      } else {
+        currentUser = user;
+        mostrarApp();
+      }
+    } catch(e) {
+      fazerLogout();
+    }
+  } else {
+    $('#login-view').style.display = 'flex';
+  }
+}
+
+// Inicia o app
+init();
+</script>
+</body>
+</html>
